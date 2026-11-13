@@ -7,6 +7,11 @@ Android-версия [INAV Configurator](https://github.com/iNavFlight/inav-conf
 
 Другие языки: [English](README.en.md) · [Deutsch](README.de.md).
 
+## Скачать APK для INAV 10.x
+
+**[Страница сборок и ссылки на APK](docs/builds.md)** — последняя сборка: `10.0.0-rc1-mobile.7`.
+Приложение предназначено для полётных контроллеров **с INAV 10.x**, не для INAV 9.x.
+
 ## Возможности и статус
 
 | Возможность | Статус |
