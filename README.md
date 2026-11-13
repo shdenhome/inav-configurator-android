@@ -1,179 +1,235 @@
-# INAV Configurator für Android
+# INAV Configurator для Android
 
-Android-Version des [INAV Configurator](https://github.com/iNavFlight/inav-configurator):
-eine Capacitor-WebView-App, die den Original-Quellcode **unverändert als Git-Submodule**
-einbindet. Verbindung zum Flight Controller per **USB-OTG** (MSP über VCP/CP210x/FTDI/CH340).
+Android-версия [INAV Configurator](https://github.com/iNavFlight/inav-configurator):
+приложение на Capacitor WebView, которое подключает исходный код оригинального
+конфигуратора **без изменений, как Git-подмодуль**. Связь с полётным контроллером —
+через **USB OTG**: MSP по VCP/CP210x/FTDI/CH340.
 
-*Read this in [English](README.en.md).*
+Другие языки: [English](README.en.md) · [Deutsch](README.de.md).
 
-## Status
+## Возможности и статус
 
-| Funktion | Status |
+| Возможность | Статус |
 |---|---|
-| Verbinden per USB-OTG, alle Konfigurations-Tabs, Disconnect | ✅ funktioniert |
-| Mission Control (Karte braucht Internet) | ✅ funktioniert |
-| Einstellungs-Backup: „In Datei speichern" (führt automatisch `diff all` aus) | ✅ funktioniert |
-| Einstellungs-Restore: „Aus Datei laden" (speichert nach dem Übertragen automatisch) | ✅ funktioniert |
-| Firmware flashen (DFU) | ❌ nicht unterstützt (eigenes USB-Protokoll) → am PC flashen; Tab ausgeblendet |
-| SITL / TCP / UDP | ❌ nicht unterstützt (Stubs vorhanden); Tab ausgeblendet |
-| Map Generator (neu in 10.0): Kartenkacheln für ETHOS/EdgeTX-Widgets und INAV-Terrain (`.TER`) | ✅ Export als ZIP über den Android-Speicherdialog (Terrain-ZIP komprimiert: 53 MB `.TER` → ca. 17 MB) **oder** „Sync to SD Card“ direkt in einen per Android-Ordnerdialog gewählten Ordner (z.B. SD-Karte im Handy; Berechtigung bleibt gespeichert); Kachel-Cache im App-Speicher. „Eject“ und „Export as ZIP“ ausgeblendet; ohne gewählten Ordner speichert der Terrain-Dialog über „Generate & Save“ |
-| Blackbox-Download | ❌ noch nicht angebunden |
+| Подключение через USB OTG, вкладки настройки и отключение | ✅ Работает по результатам проверок исходного проекта; последние изменения USB не проверялись на физическом устройстве |
+| Управление миссиями — Mission Control | ✅ Работает; для загрузки карты нужен интернет |
+| Резервная копия настроек: «В файл» | ✅ Автоматически выполняет `diff all` |
+| Восстановление настроек: «Из файла» | ✅ Автоматически сохраняет настройки после передачи команд |
+| Прошивка через DFU | ❌ Не поддерживается: нужен отдельный USB-протокол. Используйте ПК; вкладка скрыта |
+| Локальный деморежим INAV 10 | ✅ Встроенный симулятор SITL для ARM64, подключение к `127.0.0.1:5760` |
+| Произвольные подключения SITL / TCP / UDP | ❌ Не поддерживаются; отдельная вкладка SITL скрыта. Локальный деморежим доступен через список портов |
+| Генератор карт — Map Generator | ✅ Экспорт тайлов для виджетов ETHOS/EdgeTX и рельефа INAV (`.TER`) в ZIP через системный диалог Android либо синхронизация с выбранной папкой SD-карты |
+| Скачивание Blackbox | ❌ Пока не подключено |
 
-**Version 10.0.0-rc1:** Upstream-Stand `10.0.0-rc1` (Release Candidate). Getestet auf
-Xiaomi Pad (Android 15) mit TBS_LUCID_H7_WING_MINI (INAV 10.0.0). ⚠️ Ab 10.0 akzeptiert der Configurator **nur noch
-Flugcontroller mit INAV 10.x** (Bereich wird aus der App-Version abgeleitet) — für FCs mit
-INAV 9.x die App-Version 9.1.1 verwenden.
+**Текущая версия: `10.0.0-rc1-mobile.7`**, на основе INAV Configurator `10.0.0-rc1`.
+Начиная с версии 10.0 конфигуратор принимает **только контроллеры с INAV 10.x**:
+диапазон совместимости определяется версией приложения. Для INAV 9.x используйте
+версию приложения 9.1.1.
 
-Getestet mit INAV Configurator 9.1.1 auf Android, FC: TBS_LUCID_H7_WING_MINI (INAV 9.1.0)
-und MICOAIR743V2 (INAV 9.0.1). Der per „In Datei speichern" erzeugte Diff wurde
-zeichengenau gegen die Windows-Version verglichen — identisch bis auf die
-Sensor-Kalibrierwerte, die der FC bei jeder Kalibrierung neu ermittelt.
+В исходном проекте версия 10.0.0-rc1 проверялась на Xiaomi Pad с Android 15 и
+контроллером TBS_LUCID_H7_WING_MINI с INAV 10.0.0. Версия 9.1.1 проверялась с
+TBS_LUCID_H7_WING_MINI на INAV 9.1.0 и MICOAIR743V2 на INAV 9.0.1. Результат
+`diff all`, сохранённый приложением, сравнивался посимвольно с версией для Windows:
+различались только значения калибровки датчиков, которые контроллер определяет заново.
 
-## Architektur: „Shim statt Fork"
+Для изменений mobile.7 выполнены сборка APK и браузерные проверки интерфейса,
+подключения к симулятору, CLI и переподключения. Пользователь подтвердил подключение
+деморежима на TECNO POVA 7 Ultra 5G. Последний APK не проверялся на подключённом
+к среде разработки телефоне или эмуляторе Android.
 
-Der INAV Configurator ist eine Electron-App — die gesamte UI ist Web-Technologie. Nur die
-schmale Electron-Schicht wird ersetzt. **Keine Datei im Upstream-Repo wird verändert.**
+## Мобильный интерфейс и предпросмотр
 
-1. **Git-Submodule** `inav-configurator/` — gepinnt auf einen Upstream-Release-Stand.
-2. **`shim/electron-api.js`** — Nachbau der Preload-Brücke `window.electronAPI`
-   (Original: `inav-configurator/js/main/preload.js`). Serial → natives USB-Plugin,
-   Datei-Dialoge → natives FileDialog-Plugin, Settings → localStorage,
-   App-Infos → Web-Äquivalente, nicht Unterstütztes → saubere Stubs.
-3. **`vite.config.mobile.mjs`** — baut den Upstream-Code eigenständig (das
-   Electron-Forge-Setup des Upstreams ist außerhalb von Forge nicht nutzbar).
-   Enthält Aliase für Node-/Electron-Module → `shim/`, jQuery-Injektion,
-   Asset-Inlining sowie **selbstüberwachende Build-Zeit-Patches**:
-   - `upstream-patches`: ein Upstream-Bug (ungeschütztes `callback()` in
-     `GUI.tab_switch_cleanup`). Der frühere `appUpdater.js`-Patch ist seit 10.0
-     upstream behoben und entfernt.
-   - `android-cli`: blendet auf Android sinnlose Bedienelemente aus
-     (`.msc`, `.copy`, `.diffall`, Firmware-Flasher- und SITL-Tab, im Map Generator „Eject SD Card“) und ersetzt
-     den CLI-Save-Handler durch das Ein-Knopf-Backup; ergänzt nach „Aus Datei
-     laden" ein automatisches `save`.
+- Компактный верхний блок с селекторами, подключением и настройками выровнен вправо.
+  Его масштаб подстраивается под доступную ширину.
+- На узких экранах меню открывается отдельной панелью; текст отделён от иконок.
+- Формы подстраиваются под ширину содержимого. Сохранены увеличение двумя пальцами
+  и перемещение увеличенной страницы одним пальцем.
+- Учитываются системные панели и вырез экрана телефона.
+- Кнопка «Консоль» закреплена рядом со строкой сообщений и раскрывает исходную
+  консоль INAV. Отдельный «Журнал приложения» доступен в левом меню и поддерживает
+  копирование, сохранение и очистку диагностических сообщений.
 
-   Findet ein Patch seine Code-Stelle nicht mehr, warnt der Build.
-   Build-Target ist `es2022`, weil Upstream ab 10.0 Top-Level-`await` nutzt
-   (`js/browser-entry.js`).
-4. **`android-src/`** — native Capacitor-Plugins `UsbSerialPlugin.java`
-   (USB Host API via [usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android))
-   und `FileDialogPlugin.java` (Storage Access Framework für Datei-Dialoge),
-   dazu `MainActivity.java`. Wichtig: Der WebView-User-Agent bekommt den Zusatz
-   `Electron/0.0.0-android`, weil der Upstream die Electron-Version aus dem
-   User-Agent parst und sonst crasht.
+[PDF с видами экранов](docs/android-mobile-preview.pdf) содержит 62 снимка для
+31 раздела в портретной и горизонтальной ориентациях. Это браузерный предпросмотр
+текущих правок, а не снимки физического телефона. Для длинных страниц показана
+начальная видимая область.
 
-Datenfluss: `UI (unverändert) → window.electronAPI (Shim) → Capacitor → natives Plugin → USB-OTG / SAF`
+На страницах PID, редактора JavaScript и управления миссиями остаются проблемы
+компоновки. Полный перечень изменений и проверок — в
+[техническом описании на английском](docs/android-mobile.md).
 
-Wichtige Vertragsdetails, die der Shim exakt einhält (aus dem Upstream-Code abgeleitet):
-- `listSerialDevices()` liefert ein Array **nackter Pfad-Strings ohne Doppelpunkt**
-  (Format `usb-<deviceId>`); `port_handler.js` filtert alles mit `:` heraus.
-- `serialConnect()` liefert `{error: false, id}` — ohne `id` sendet die App nichts.
-- `serialSend()` → `{bytesWritten}` bzw. `{error, msg}`; `serialClose()` feuert
-  zusätzlich das `serialClose`-Event (sonst bleibt der Disconnect wirkungslos).
-- `writeFile()` löst mit **falsy bei Erfolg** auf; `readFile()` liefert `{error, data}`;
-  `showOpenDialog()` liefert `filePaths` als Array. Als „Pfad" wird die
-  `content://`-URI aus dem Android-Dialog durchgereicht.
+## Архитектура: слой совместимости вместо изменения оригинала
 
-## Bedienung: Backup & Restore
+INAV Configurator — приложение Electron с интерфейсом на веб-технологиях.
+Заменяется только слой взаимодействия с Electron. **Файлы исходного репозитория
+конфигуратора не изменяются.**
 
-**Sichern:** CLI-Tab → „In Datei speichern". Die App führt automatisch `diff all` aus,
-wartet auf die vollständige Ausgabe und öffnet dann den Android-Speicherdialog —
-Ordner und Dateiname frei wählbar, Vorschlag `cli_<board>_<datum>.txt`. Die Statuszeile
-meldet die geschriebene Größe in Bytes.
+1. **Подмодуль `inav-configurator/`** закреплён на определённой версии оригинала.
+2. **`shim/electron-api.js`** реализует интерфейс `window.electronAPI` из
+   `inav-configurator/js/main/preload.js`: последовательный порт направляется
+   в нативный USB-плагин, файловые диалоги — в FileDialog, настройки — в
+   localStorage. Информация о приложении предоставляется веб-средствами,
+   неподдерживаемые функции заменены заглушками. Локальный деморежим обслуживает
+   плагин NativeDemo.
+3. **`vite.config.mobile.mjs`** собирает код конфигуратора отдельно от Electron
+   Forge. Настроены замены модулей Node/Electron на `shim/`, подключение jQuery,
+   встраивание ресурсов и исправления, применяемые при сборке:
+   - `upstream-patches` исправляет незащищённый вызов `callback()` в
+     `GUI.tab_switch_cleanup`. Старое исправление `appUpdater.js` удалено:
+     оно уже внесено в оригинальный проект начиная с 10.0.
+   - `android-cli` скрывает неподдерживаемые элементы: `.msc`, `.copy`,
+     `.diffall`, вкладки прошивки и SITL, кнопку «Eject SD Card» в генераторе
+     карт. Обработчик сохранения CLI заменён резервным копированием одной
+     кнопкой; после загрузки из файла автоматически отправляется `save`.
 
-**Wiederherstellen:** CLI-Tab → „Aus Datei laden" → Datei wählen (Android startet im
-zuletzt benutzten Ordner) → Vorschau bestätigen. Die Befehle gehen an den FC, danach
-sendet die App automatisch `save`; die Statuszeile meldet „Settings applied and saved."
-Schlägt das fehl, erscheint ein Hinweis, „Einstellungen speichern" manuell zu drücken.
+   Если нужный фрагмент кода больше не найден, сборка выводит предупреждение.
+   Целевой стандарт — `es2022`: начиная с 10.0 оригинал использует `await`
+   на верхнем уровне в `js/browser-entry.js`.
+4. **`android-src/`** содержит нативные плагины Capacitor:
+   `UsbSerialPlugin.java` использует USB Host API через
+   [usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android),
+   `FileDialogPlugin.java` — Storage Access Framework, а `NativeDemoPlugin.java`
+   запускает локальный симулятор и передаёт данные MSP. В `MainActivity.java`
+   плагины регистрируются, а к User-Agent WebView добавляется
+   `Electron/0.0.0-android`: оригинальный код извлекает из него версию Electron.
+5. **`shim/mobile-layout.css`, `shim/mobile-layout.js`, `shim/fit-page.js`**
+   отвечают за мобильную компоновку; **`shim/app-log.js`** — за диагностический журнал.
 
-ℹ️ **Cloud-Ordner:** Wird als Ziel ein Sync-Anbieter (z.B. Nextcloud) gewählt, zeigt der
-Dateimanager die Datei zunächst mit 0 Bytes — der Anbieter materialisiert sie erst
-verzögert, oft erst nach Beenden der Apps. Die Byte-Angabe in der Statuszeile ist die
-verlässliche Auskunft darüber, was tatsächlich geschrieben wurde. Wer es sofort greifbar
-will, speichert lokal (Downloads/Dokumente) und lädt anschließend hoch.
+Поток данных: `интерфейс → window.electronAPI → Capacitor → нативный плагин → USB OTG / SAF / локальный SITL`.
 
-## Bauen
+Важные соглашения интерфейса совместимости:
 
-Voraussetzungen: Node ≥ 20, Android Studio (mit SDK + mitgeliefertem JDK), Git.
+- `listSerialDevices()` возвращает массив строк путей **без двоеточия**, в формате
+  `usb-<deviceId>`: `port_handler.js` отбрасывает строки с `:`.
+- `serialConnect()` возвращает `{error: false, id}`: без `id` приложение не отправляет данные.
+- `serialSend()` возвращает `{bytesWritten}` либо `{error, msg}`. `serialClose()`
+  также генерирует событие `serialClose`, необходимое для завершения отключения.
+- `writeFile()` при успехе возвращает ложное значение; `readFile()` — `{error, data}`;
+  `showOpenDialog()` — массив `filePaths`. В качестве пути передаётся URI
+  `content://` из системного диалога Android.
+
+## Резервное копирование и восстановление
+
+**Сохранение:** откройте CLI и нажмите «В файл» / «Save to file».
+Приложение выполнит `diff all`, дождётся полного вывода и откроет системный
+диалог сохранения Android. Папку и имя файла можно выбрать; предлагаемое имя —
+`cli_<board>_<date>.txt`. Строка состояния покажет число записанных байтов.
+
+**Восстановление:** в CLI нажмите «Из файла» / «Load from file», выберите файл
+и подтвердите предварительный просмотр. Android откроет последнюю использованную
+папку. После передачи команд контроллеру приложение автоматически отправит `save`.
+При успехе появится «Settings applied and saved». Если сохранение не удалось,
+приложение предложит нажать «Сохранить настройки» вручную.
+
+**Облачные папки:** при сохранении через провайдера синхронизации, например
+Nextcloud, файловый менеджер сначала может показывать размер 0 байт. Провайдер
+создаёт файл с задержкой, иногда после закрытия приложений. Ориентируйтесь на
+число байтов в строке состояния. Для немедленного доступа сохраните файл локально
+в «Загрузки» или «Документы», затем загрузите в облако.
+
+## Генератор карт
+
+Map Generator, добавленный в 10.0, экспортирует тайлы для виджетов ETHOS/EdgeTX
+и рельеф INAV в формате `.TER`. Доступны ZIP через диалог сохранения Android
+и «Sync to SD Card» — запись в папку, выбранную системным диалогом, например
+на SD-карте телефона. Разрешение на папку сохраняется, кеш тайлов хранится
+в данных приложения. Кнопки «Eject» и «Export as ZIP» скрыты; если папка не
+выбрана, диалог рельефа сохраняет результат через «Generate & Save».
+Для примера: 53 МБ файлов `.TER` сжимаются примерно до 17 МБ в ZIP.
+
+## Сборка
+
+Для текущей версии используются Node 24, JDK 21, Android SDK 36 и Git.
+Android Studio упрощает установку SDK и настройку среды.
 
 ```bash
-git clone --recursive https://github.com/Bingo2023/inav-configurator-android.git
+git clone --recursive https://github.com/shdenhome/inav-configurator-android.git
 cd inav-configurator-android
-npm install                 # installiert auch Submodule-Deps (postinstall)
-npm run sync                # Vite-Build mit Shims + Capacitor-Sync
-cd android && ./gradlew assembleDebug     # → app/build/outputs/apk/debug/app-debug.apk
+npm install                 # также устанавливает зависимости подмодуля
+npm run sync                # сборка Vite и синхронизация Capacitor
+cd android && ./gradlew assembleDebug
+# APK: android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Windows/Git Bash: `export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`
-(am besten in `~/.bashrc`).
+В Windows/Git Bash можно задать
+`export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`, например в `~/.bashrc`.
+Проверьте, что выбранный JDK подходит для текущей версии Gradle.
 
-Wird das `android/`-Verzeichnis neu erzeugt (`npx cap add android`), müssen die Dateien
-aus `android-src/` erneut eingespielt werden — siehe `android-src/manifest-snippet.xml`
-und `android-src/gradle-snippet.txt`; beide Plugins werden in `MainActivity.java`
-registriert.
+Если каталог `android/` создан заново командой `npx cap add android`, нужно
+повторно перенести нативные файлы из `android-src/`, зарегистрировать все три
+плагина в `MainActivity.java` и восстановить настройки Manifest и Gradle.
+Базовые фрагменты находятся в `android-src/manifest-snippet.xml` и
+`android-src/gradle-snippet.txt`; для деморежима также нужны настройки извлечения
+и упаковки нативного исполняемого файла из текущего каталога `android/`.
 
-## Update auf eine neue Upstream-Version
+Встроенный ARM64-симулятор уже включён в репозиторий. Для его пересборки см.
+[инструкцию NativeDemo](native-demo/README.md) с версией исходников INAV,
+патчем и настройками Android NDK.
+
+## Обновление оригинального конфигуратора
 
 ```bash
-./scripts/update-upstream.sh <tag-oder-commit>    # z.B. 9.1.1 oder 19ba259
+./scripts/update-upstream.sh <тег-или-коммит>    # например, 9.1.1 или 19ba259
 ```
 
-Hinweis: INAV veröffentlicht Releases gelegentlich **ohne Git-Tag** — dann den
-Commit-Hash von der GitHub-Release-Seite verwenden.
+INAV иногда публикует релиз **без Git-тега**. В этом случае используйте хеш
+коммита со страницы релиза GitHub.
 
-Das Skript checkt aus, installiert, baut und synct — und druckt eine Prüfliste.
-Die drei Stellen, an denen ein Update reiben kann:
+Скрипт переключает версию, устанавливает зависимости, собирает и синхронизирует
+приложение, затем выводит список проверок. При обновлении обратите внимание на:
 
-1. **Preload-Diff** (macht das Skript automatisch gegen den vorherigen Stand):
-   neue/geänderte Brücken-Funktionen → `shim/electron-api.js` nachziehen.
-   (Beispiel 9.1.1: `confirmDialog` wurde asynchron, drei Backup-Funktionen kamen dazu.
-   Beispiel 10.0: `pathExists` und `ejectDrive` kamen dazu.) Zusätzlich listet das Skript
-   alle `electronAPI.*`-Aufrufe im Renderer, die der Shim nicht kennt.
-2. **Build-Warnungen lesen**: `[upstream-patches] …` oder `[android-cli] …` mit
-   „nicht gefunden" heißt, eine gepatchte Stelle ist umgezogen oder wurde upstream
-   gefixt → Patch in `vite.config.mobile.mjs` prüfen, anpassen oder entfernen.
-3. **Neue Node-/Electron-Imports** (greppt das Skript): ggf. neuen Alias/Shim ergänzen.
+1. **Изменения preload-интерфейса.** Скрипт сравнивает его с предыдущей версией.
+   Новые и изменённые функции нужно учесть в `shim/electron-api.js`.
+   В 9.1.1 `confirmDialog` стал асинхронным и добавились три функции резервного
+   копирования; в 10.0 появились `pathExists` и `ejectDrive`. Скрипт также
+   перечисляет вызовы `electronAPI.*`, которые ещё не реализованы в слое совместимости.
+2. **Предупреждения сборки.** Сообщения `[upstream-patches]` или `[android-cli]`
+   с текстом «not found» означают, что нужный фрагмент переместился либо уже
+   исправлен в оригинале. Проверьте, измените или удалите патч в `vite.config.mobile.mjs`.
+3. **Новые импорты Node/Electron.** Скрипт ищет их; при необходимости добавьте
+   замену модуля или новую реализацию в `shim/`.
 
-Nach dem Test: Submodule-Pin committen (`git add inav-configurator && git commit …`).
+После проверки зафиксируйте новую версию подмодуля:
+`git add inav-configurator && git commit …`.
 
-⚠️ Niemals `npm update`/`npm audit fix` **im Submodule-Ordner** ausführen — das
-verändert dessen `package.json`/`yarn.lock` und bricht das Prinzip „unveränderte
-Quelle". Falls doch passiert: `git -C inav-configurator restore package.json yarn.lock`.
+Не запускайте `npm update` или `npm audit fix` **в каталоге подмодуля**:
+это изменит его `package.json` / `yarn.lock`. Для отмены таких изменений:
+`git -C inav-configurator restore package.json yarn.lock`.
 
-## Release bauen
+## Сборка релиза и подпись
 
-Releases werden mit einem festen Release-Schlüssel signiert (seit 10.0.0-rc1; davor
-Debug-Schlüssel wechselnder Rechner). Der Schlüssel liegt **nicht** im Repo.
+Начиная с 10.0.0-rc1 исходный проект поддерживает подпись релизов постоянным
+ключом. Ключ **не хранится в репозитории**. Локальные debug-сборки подписываются
+отладочным ключом среды сборки.
 
 ```powershell
 $env:INAV_KEYSTORE_PROPERTIES = 'D:\Android\keys\keystore.properties'
 npm run sync
 cd android; .\gradlew.bat assembleRelease
-# → android/app/build/outputs/apk/release/app-release.apk
+# APK: android/app/build/outputs/apk/release/app-release.apk
 ```
 
-`keystore.properties` enthält `storeFile`, `storePassword`, `keyAlias`, `keyPassword`.
-⚠️ Schlüsseldatei **und** Passwort sichern — ohne sie lässt sich kein Update mehr über
-installierte Versionen einspielen (Nutzer müssten deinstallieren).
+Файл `keystore.properties` содержит `storeFile`, `storePassword`, `keyAlias`
+и `keyPassword`. Сохраните резервные копии ключа и пароля: без того же ключа
+обновление поверх установленной версии невозможно, потребуется переустановка.
 
-Vor dem Release: `version` in `package.json` setzen (wird zur APK-`versionName`) und
-`versionCode` in `android/app/build.gradle` erhöhen. Tag `v<version>`, GitHub-Release
-mit der APK als `INAV.Configurator.Android_<version>.apk`.
+Перед релизом обновите `version` в `package.json` — она станет `versionName` APK —
+и увеличьте `versionCode` в `android/app/build.gradle`. Для публикации используйте
+тег `v<version>` и GitHub Release с файлом `INAV.Configurator.Android_<version>.apk`.
 
-## Bekannte Eigenheiten
+## Известные особенности
 
-- Beim Betreten des CLI-Tabs erscheinen kurz Binärzeichen (`$X…`) in der Konsole:
-  noch unterwegs befindliche MSP-Antworten, die als Text dargestellt werden. Rein
-  optisch, ohne Auswirkung auf den Diff — „Bildschirm leeren" räumt sie weg.
-- Die Oberfläche ist für Desktop-Breiten gebaut; Tablet oder Querformat empfohlen.
-- Die APK ist Debug-signiert (nicht aus dem Play Store) — bei der Installation muss
-  „Unbekannte Quellen" für den Datei-Manager erlaubt werden.
+- При входе в CLI в консоли могут кратковременно появляться символы `$X…`:
+  это ещё поступающие ответы MSP, отображённые как текст. На результат `diff`
+  они не влияют; кнопка очистки экрана убирает их.
+- Мобильная адаптация пока не завершена: отдельные страницы требуют доработки.
+  Снимки текущего состояния доступны в PDF выше.
+- В симуляторе доступны не все аппаратные функции; встроенная демоверсия
+  рассчитана только на ARM64 Android.
+- Для установки APK вне магазина приложений нужно разрешить установку
+  из выбранного файлового менеджера или браузера.
 
-## Lizenz
+## Лицензия
 
-GPL-3.0, wie der Upstream.
-
-## Mobile Oberfläche und Demo
-
-[Änderungen und Validierung (Englisch)](docs/android-mobile.md),
-[Bildschirmvorschau als PDF](docs/android-mobile-preview.pdf) und
-[Build-Anleitung für die native INAV-Demo](native-demo/README.md).
+GPL-3.0, как и в оригинальном проекте. Лицензия прошивки симулятора также
+включена в [native-demo/LICENSE](native-demo/LICENSE).

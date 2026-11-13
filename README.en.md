@@ -4,7 +4,7 @@ Android version of the [INAV Configurator](https://github.com/iNavFlight/inav-co
 a Capacitor WebView app that embeds the original source code **unmodified, as a Git
 submodule**. Connects to the flight controller via **USB OTG** (MSP over VCP/CP210x/FTDI/CH340).
 
-*Deutsche Fassung: [README.md](README.md).*
+*Другие языки: [Русский](README.md) · [Deutsch](README.de.md).*
 
 ## Status
 
