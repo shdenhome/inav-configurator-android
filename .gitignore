@@ -6,3 +6,7 @@ android/.idea/
 *.jks
 *.keystore
 keystore.properties
+
+# Local firmware checkout and native demo build output
+native-demo/firmware/
+native-demo/build/

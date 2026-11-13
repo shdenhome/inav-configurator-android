@@ -1,0 +1,80 @@
+diff --git a/src/main/drivers/serial_tcp.c b/src/main/drivers/serial_tcp.c
+index 7b1c4625..048c62e5 100644
+--- a/src/main/drivers/serial_tcp.c
++++ b/src/main/drivers/serial_tcp.c
+@@ -68,7 +68,7 @@ static tcpPort_t *tcpReConfigure(tcpPort_t *port, uint32_t id)
+     }
+ 
+     uint16_t tcpPort = tcpBasePort + id - 1;
+-    if (lookupAddress(NULL, tcpPort, SOCK_STREAM, (struct sockaddr*)&port->sockAddress, &sockaddrlen) != 0) {
++    if (lookupAddress("127.0.0.1", tcpPort, SOCK_STREAM, (struct sockaddr*)&port->sockAddress, &sockaddrlen) != 0) {
+             return NULL;
+     }
+     port->socketFd = socket(((struct sockaddr*)&port->sockAddress)->sa_family, SOCK_STREAM, IPPROTO_TCP);
+diff --git a/src/main/fc/cli.c b/src/main/fc/cli.c
+index b74fd8cf..48f381ed 100644
+--- a/src/main/fc/cli.c
++++ b/src/main/fc/cli.c
+@@ -21,6 +21,9 @@
+ #include <stdlib.h>
+ #include <stdarg.h>
+ #include <string.h>
++#ifdef __ANDROID__
++#include <strings.h>
++#endif
+ #include <math.h>
+ #include <ctype.h>
+ 
+diff --git a/src/main/target/SITL/target.c b/src/main/target/SITL/target.c
+index 6cf758db..3a0af58a 100644
+--- a/src/main/target/SITL/target.c
++++ b/src/main/target/SITL/target.c
+@@ -113,7 +113,12 @@ void systemInit(void) {
+ 
+     pthread_attr_init(&thAttr);
+     pthread_attr_getschedpolicy(&thAttr, &policy);
++#ifdef __ANDROID__
++    struct sched_param priority = { .sched_priority = sched_get_priority_min(policy) };
++    pthread_setschedparam(pthread_self(), policy, &priority);
++#else
+     pthread_setschedprio(pthread_self(), sched_get_priority_min(policy));
++#endif
+     pthread_attr_destroy(&thAttr);
+ #endif
+ 
+@@ -483,7 +488,17 @@ bool isMPUSoftReset(void)
+ int lookupAddress (char *name, int port, int type, struct sockaddr *addr, socklen_t* len )
+ {
+     struct addrinfo *servinfo, *p;
++#ifdef __ANDROID__
++    // Bionic rejects the desktop AI_V4MAPPED/AI_ADDRCONFIG combination.
++    // The Android demo binds numeric loopback without DNS or interface probing.
++    struct addrinfo hints = {.ai_family = AF_UNSPEC, .ai_socktype = type, .ai_flags = 0};
++    if (name != NULL && strcmp(name, "127.0.0.1") == 0) {
++        hints.ai_family = AF_INET;
++        hints.ai_flags = AI_NUMERICHOST;
++    }
++#else
+     struct addrinfo hints = {.ai_family = AF_UNSPEC, .ai_socktype = type, .ai_flags = AI_V4MAPPED|AI_ADDRCONFIG};
++#endif
+     if (name == NULL) {
+ 	hints.ai_flags |= AI_PASSIVE;
+     }
+diff --git a/src/main/target/link/sitl.ld b/src/main/target/link/sitl.ld
+index 4053d053..15c95861 100644
+--- a/src/main/target/link/sitl.ld
++++ b/src/main/target/link/sitl.ld
+@@ -2,7 +2,7 @@ SECTIONS {
+   /* BLOCK: on Windows (PE) output section must be page-aligned. Use 4-byte alignment otherwise */
+   /* SUBALIGN: force 4-byte alignment of input sections for pg_registry.
+      Gcc defaults to 32 bytes; padding is then inserted between object files, breaking the init structure. */
+-  .pg_registry BLOCK( DEFINED(__section_alignment__) ? __section_alignment__ : 4 ) :   SUBALIGN(4)
++  .pg_registry ALIGN(0x10000) :   SUBALIGN(4)
+   {
+     PROVIDE_HIDDEN (__pg_registry_start = . );
+     PROVIDE_HIDDEN (___pg_registry_start = . );
+@@ -19,3 +19,4 @@ SECTIONS {
+   }
+ }
+ INSERT AFTER .text;
++

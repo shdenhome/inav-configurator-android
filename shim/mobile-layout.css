@@ -1,0 +1,208 @@
+/* Android-only overrides. No scaling of the desktop page to a 980px viewport. */
+html.android-mobile {
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+    /* Scale by the shorter viewport dimension, with limits on phones/tablets. */
+    font-size: clamp(10px, 2.8vmin, 14px);
+}
+html.android-mobile body { font-size: 1rem; }
+html.android-mobile #main-wrapper {
+    display: grid;
+    grid-template-columns: clamp(10rem, 21vw, 15rem) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    width: 100%; height: 100dvh; overflow: hidden; box-sizing: border-box;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+             env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+html.android-mobile #main-wrapper > .clear-both { display: none; }
+html.android-mobile .headerbar {
+    grid-area: 1 / 1 / 2 / -1;
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    align-items: center; gap: .35rem .65rem;
+    width: auto; height: auto; padding: .45rem .6rem;
+}
+/* Keep the desktop controls together at the right edge. Their natural-width
+   row is fitted as a unit instead of wrapping or stretching its controls. */
+html.android-mobile #android-header-controls {
+    grid-area: 1 / 2; justify-self: end; width: max-content; min-width: 0;
+    display: grid; grid-template-columns: max-content max-content max-content;
+    align-items: center; gap: .65rem;
+}
+html.android-mobile #logo { display: none; }
+html.android-mobile #port-picker, html.android-mobile .header-wrapper { display: contents; }
+html.android-mobile #portsinput {
+    grid-area: 1 / 1; float: none; margin: 0; width: max-content; min-width: 0;
+}
+html.android-mobile #portsinput .portsinput__row { display: flex; flex-wrap: nowrap; gap: .3rem; }
+html.android-mobile #portsinput .portsinput__top-element { width: 10.5rem; min-width: 0; flex: 0 0 10.5rem; max-width: 10.5rem; }
+html.android-mobile #portsinput .portsinput__top-element--port-override { width: auto !important; height: auto; }
+html.android-mobile #port-override { width: 100%; box-sizing: border-box; }
+html.android-mobile #portsinput .dropdown { margin: 0; height: auto; }
+html.android-mobile #portsinput .dropdown-select { width: 100%; height: 2.2rem; padding: .2rem; font-size: 1rem; }
+html.android-mobile #portsinput .portsinput__top-element--inline { margin-top: .25rem; }
+html.android-mobile #connectbutton {
+    grid-area: 1 / 2; float: none; position: static; width: auto; height: auto; margin: 0;
+    display: flex; flex-direction: row; gap: .35rem; align-items: center;
+}
+html.android-mobile .connect_b a { margin: 0; width: clamp(26px, 7vmin, 36px); height: clamp(26px, 7vmin, 36px); background-size: 80%; background-position: center; }
+html.android-mobile .connect_state { width: auto; height: auto; font-size: .85rem; line-height: 1.4; margin: 0; }
+html.android-mobile #options { grid-area: 1 / 3; margin: 0; float: none; width: 2.4rem; height: 2.8rem; background-size: 1.8rem; background-position: center; }
+html.android-mobile #profiles_wrapper_global {
+    grid-area: 1 / 1; float: none; width: max-content; height: auto; margin: 0; line-height: normal; white-space: nowrap;
+}
+html.android-mobile #profiles_wrapper_global > div { float: none; display: inline-block; width: 10.5rem; vertical-align: middle; }
+html.android-mobile #profiles_wrapper_global .dropdown { height: auto; margin: .1rem 0; }
+html.android-mobile #profiles_wrapper_global select { width: 100%; height: auto; min-height: 2rem; font-size: .9rem; }
+html.android-mobile #sensor-status { grid-area: 2 / 1 / 3 / -1; justify-self: start; width: max-content; max-width: calc(100% - 7rem); float: none; margin: 0; height: auto; overflow-x: auto; }
+html.android-mobile #sensor-status ul { display: flex; }
+html.android-mobile #sensor-status li { flex: 0 0 2.5rem; float: none; height: auto; padding: 0 .15rem; }
+html.android-mobile #sensor-status li > div { height: auto; padding-top: 2rem; background-size: 2rem; font-size: .75rem; line-height: 1.3; margin: 0; }
+html.android-mobile #quad-status_wrapper { grid-area: 2 / 2; justify-self: end; margin: 0; float: none; max-width: 6rem; }
+html.android-mobile #quad-status_wrapper .battery-icon { display: none; }
+html.android-mobile #quad-status_wrapper .battery-legend { width: 100%; font-size: 10px; overflow-wrap: anywhere; }
+html.android-mobile #quad-status_wrapper .bottomStatusIcons { margin: 0; height: 24px; display: flex; }
+html.android-mobile #quad-status_wrapper .statusicon { margin: 3px; }
+html.android-mobile #dataflash_wrapper_global { display: none !important; }
+html.android-mobile #android-menu-toggle {
+    grid-area: 1 / 1; display: none; color: white; background: #28637c;
+    border: 1px solid #4b8da8; border-radius: .25rem; padding: .5rem .6rem;
+    font: inherit; cursor: pointer;
+}
+html.android-mobile #log { font-size: .9rem; grid-area: 2 / 1 / 3 / -1; min-width: 0; height: 2rem; line-height: 1.8rem; position: relative; }
+html.android-mobile #log .wrapper { padding-right: 8rem; }
+html.android-mobile .logswitch { right: .4rem; background: #242424; }
+html.android-mobile #scrollicon { display: none; }
+/* Allow a one-finger drag to reach the visual viewport after native pinch zoom.
+   Containing nested scrolls here also traps the magnified viewport at its edges. */
+html.android-mobile .tab_container, html.android-mobile .tab_container.logopen {
+    grid-area: 3 / 1; float: none; width: auto; height: auto; min-height: 0;
+    overflow-y: auto; overscroll-behavior: auto; transition: none; box-sizing: border-box;
+}
+html.android-mobile #tabs { font-size: 1.05rem; }
+html.android-mobile #tabs li a {
+    height: auto; min-height: 2.8rem; box-sizing: border-box; padding: .6rem .5rem .6rem 2.4rem;
+    white-space: normal; overflow: visible; overflow-wrap: anywhere;
+    font-size: 1.05rem; line-height: 1.4; background-position: .8rem .9rem; text-shadow: none;
+}
+html.android-mobile #tabs .group-items li a { padding-left: 2.5rem; }
+html.android-mobile #tabs .group-items.expanded { max-height: none; }
+html.android-mobile #tabs .group-header { min-height: 2.8rem; box-sizing: border-box; padding: .7rem; }
+html.android-mobile #tabs .group-header.active .group-title, html.android-mobile #tabs .group-header.active .chevron { display: block; }
+html.android-mobile #tabs .group-title { font-size: 1rem; }
+html.android-mobile #tabs .nav-toggle-all .toggle-text { display: inline; }
+html.android-mobile #tabs .nav-toggle-all a { display: flex; }
+html.android-mobile #android-menu-backdrop { display: none; }
+html.android-mobile #content, html.android-mobile #content.logopen {
+    grid-area: 3 / 2; width: auto; height: auto; min-height: 0; min-width: 0; margin: 0;
+    overflow: auto; overscroll-behavior: auto; transition: none;
+}
+html.android-mobile #status-bar {
+    grid-area: 4 / 1 / 5 / -1; position: static; width: auto; height: auto; min-height: 22px;
+    padding: 0 .4rem; overflow-x: auto; font-size: 10px; box-sizing: border-box;
+}
+html.android-mobile #status-bar div:has(.arming-flags) { flex: 0 0 auto; max-width: none; }
+html.android-mobile #content .content_wrapper { box-sizing: border-box; padding: .75rem; }
+html.android-mobile #content .toolbar_fixed_bottom { display: flex; flex-direction: column; min-height: 0; }
+html.android-mobile #content .toolbar_fixed_bottom > .content_wrapper {
+    flex: 1 1 0; min-height: 0; height: auto; overflow: auto;
+}
+html.android-mobile #content .toolbar_fixed_bottom > .content_toolbar { position: static; flex: 0 0 auto; flex-wrap: wrap; }
+html.android-mobile .content_toolbar .btn a { font-size: 1rem; min-height: 2.6rem; line-height: 1.4; display: flex; align-items: center; }
+html.android-mobile #content input:not([type=checkbox]):not([type=radio]), html.android-mobile #content select { font-size: 1rem !important; min-height: 2.2em; max-width: 24ch; box-sizing: border-box; }
+html.android-mobile .tab-landing { min-height: 100%; height: auto; }
+html.android-mobile .tab-landing .content_wrapper { height: auto; padding: 0 !important; }
+html.android-mobile .tab-landing .content_top { height: auto; padding: 1rem; }
+html.android-mobile .tab-landing .logowrapper { width: auto; margin: 0; }
+html.android-mobile .tab-landing .inavLogo { width: 100%; height: clamp(3rem, 10vmin, 5rem); max-width: 24rem; margin-inline: auto; margin: 0 0 1rem; background-size: contain; }
+html.android-mobile .tab-landing .community { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; padding: .5rem; }
+html.android-mobile .tab-landing .community ul { width: auto; height: auto; font-size: 1.15rem; margin: 0; }
+html.android-mobile .tab-landing .community ul a { display: flex; align-items: center; gap: .5rem; }
+html.android-mobile .tab-landing .community ul span { position: static; padding: 0; }
+html.android-mobile .tab-landing .community ul i { margin: 0; font-size: 2rem; }
+html.android-mobile .tab-landing .content_mid .column { float: none; width: auto; }
+/* Replace the fixed 600px + 836px magnetometer layout with normal document flow. */
+html.android-mobile .tab-magnetometer-left-wrapper, html.android-mobile .tab-magnetometer-right-wrapper { float: none; width: 100%; }
+html.android-mobile .tab-magnetometer #interactive_block {
+    position: relative; width: 100%; height: clamp(18rem, 55vh, 26rem); min-height: 0; box-sizing: border-box;
+}
+html.android-mobile .tab-magnetometer #canvas_wrapper { overflow: hidden; }
+html.android-mobile .tab-magnetometer .attitude_note1, html.android-mobile .tab-magnetometer .attitude_note2 { left: auto; right: .5rem; width: min(45%, 15rem); }
+html.android-mobile .tab-magnetometer .axis-table { min-width: 32rem; }
+html.android-mobile .tab-magnetometer .config-section > .spacer_box { overflow-x: auto; }
+html.android-mobile .tab-magnetometer .cli-box { flex-wrap: wrap; overflow-wrap: anywhere; }
+html.android-mobile .tab-magnetometer .gui_box_titlebar { height: auto; min-height: 24px; }
+html.android-mobile .tab-magnetometer .spacer_box_title { float: none; }
+@media (max-width: 759px) {
+    html.android-mobile #main-wrapper { grid-template-columns: minmax(0, 1fr); }
+    html.android-mobile #android-menu-toggle { display: block; }
+    html.android-mobile #content, html.android-mobile #content.logopen { grid-column: 1; }
+    html.android-mobile .tab_container, html.android-mobile .tab_container.logopen {
+        width: min(78vw, 24rem); z-index: 4000; visibility: hidden; pointer-events: none;
+        transform: translateX(-100%);
+    }
+    html.android-mobile.android-menu-open .tab_container { transform: none; visibility: visible; pointer-events: auto; }
+    html.android-mobile.android-menu-open #android-menu-backdrop {
+        display: block; grid-area: 3 / 1; z-index: 3999; background: #0008;
+    }
+}
+
+/* Available space belongs to the page; controls keep their natural sizes. */
+html.android-mobile #portsinput .portsinput__row:has(#wireless-mode) { display: none; }
+html.android-mobile #content button, html.android-mobile #content .btn { flex-grow: 0; }
+html.android-mobile #content input[type=number] { max-width: 9ch; }
+html.android-mobile #content .default_btn a { width: fit-content; }
+html.android-mobile #log .wrapper { padding-block: 0; }
+html.android-mobile .tab-landing .content_mid { font-size: 1rem; }
+html.android-mobile .tab-landing .text1, html.android-mobile .tab-landing .text2 { font-size: 1rem; }
+html.android-mobile #options-window { max-width: 88vw; box-sizing: border-box; }
+html.android-mobile.android-demo-active .connect_state::before { content: 'DEMO · '; color: #7dd8ff; }
+/* Desktop modals must also fit inside the inset-adjusted WebView. */
+html.android-mobile .defaults-dialog__content, html.android-mobile .defaults-dialog__wizard {
+    position: fixed; box-sizing: border-box; inset: 4dvh auto auto 50%; transform: translateX(-50%);
+    width: min(94vw, 42rem); height: auto; max-height: 92dvh; overflow: auto; padding: 1rem;
+}
+html.android-mobile .defaults-dialog__info { font-size: 1rem; }
+html.android-mobile .defaults_btn a { font-size: 1rem; line-height: 1.5; white-space: normal; padding: .5rem; }
+html.android-mobile .defaults-dialog__bottom_buttons { position: sticky; bottom: 0; width: auto; font-size: 1rem !important; background: #efefef; }
+html.android-mobile .jBox-wrapper { max-width: 96vw; }
+html.android-mobile .jBox-content { max-width: 92vw; max-height: 85dvh; box-sizing: border-box; overflow: auto; }
+html.android-mobile .modal__content img { max-width: 100%; height: auto; }
+html.android-mobile .tab-setup #interactive_block { position: relative; width: 100%; height: clamp(14rem, 40vh, 25rem); box-sizing: border-box; }
+html.android-mobile .tab-setup #canvas_wrapper { overflow: hidden; }
+
+html.android-mobile .tab-magnetometer .attitude_note2 { top: .5rem; font-size: .75rem; }
+html.android-mobile .tab-magnetometer .attitude_note1 { top: auto; bottom: .5rem; font-size: .75rem; }
+/* Keep the diagnostic log action readable even over long status messages. */
+html.android-mobile #log .logswitch { inset: 0 .2rem auto auto; margin: 0; padding: 0; z-index: 20; }
+html.android-mobile #log .logswitch a { display: block; color: #fff !important; background: #28637c; border: 1px solid #7bb9d3; border-radius: .2rem; padding: 0 .6rem; line-height: 1.8rem; }
+html.android-mobile #log .wrapper { padding-right: 13rem; }
+html.android-mobile #android-console-open { display: block; box-sizing: border-box; width: 100%; padding: .8rem .7rem; border-bottom: 2px solid #37a8db; background: #254d5e; color: #fff; font: inherit; text-align: left; white-space: normal; }
+html.android-mobile #android-console { position: fixed; inset: 0; z-index: 20000; background: #151b20; color: #e8edf0; display: flex; flex-direction: column; padding: .7rem; box-sizing: border-box; gap: .7rem; }
+html.android-mobile #android-console[hidden] { display: none; }
+html.android-mobile #android-console header { display: flex; gap: 1rem; align-items: center; justify-content: space-between; }
+html.android-mobile #android-console button { font: inherit; background: #28637c; color: white; padding: .7rem; border: 1px solid #80b3ca; border-radius: .2rem; }
+html.android-mobile #android-console .android-console-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+html.android-mobile #android-console pre { flex: 1 1 0; min-height: 0; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 1rem/1.55 monospace; user-select: text; -webkit-user-select: text; }
+/* Reserve a real icon column, including upstream accordion icon rules. */
+html.android-mobile #tabs li a.tabicon,
+html.android-mobile #tabs .group-items li a.tabicon {
+    padding-left: 40px; background-position: 10px 50%; background-size: 16px 16px;
+}
+/* The log scrolls in its own cell; this button never scrolls with messages. */
+html.android-mobile #android-log-row { grid-area: 2 / 1 / 3 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; min-width: 0; background: #242424; }
+html.android-mobile #android-log-row #log { grid-area: auto; }
+html.android-mobile #android-log-row #log .wrapper { padding-right: .5rem; }
+html.android-mobile #android-log-row .logswitch { display: none; }
+html.android-mobile #android-top-console { align-self: stretch; background: #28637c; color: white; border: 1px solid #7bb9d3; border-radius: .2rem; padding: 0 .8rem; font: inherit; min-width: 6rem; }
+/* The fitted desktop page owns its scale; keep the surrounding app readable. */
+html.android-mobile #content > .android-fit-page { box-sizing: border-box; transform-origin: top left; font-size: 12px; }
+html.android-mobile #content .android-fit-page .cf_column.full { float: left; width: 100%; }
+html.android-mobile #content .android-fit-page .cf_column.half { float: left; width: 50%; }
+html.android-mobile #content .android-fit-page .cf_column.fourth { float: left; width: 25%; }
+html.android-mobile #content .android-fit-page .cf_column.threefourth_left { float: left; width: 75%; }
+html.android-mobile #content .android-fit-page .tab-magnetometer-left-wrapper { float: left; width: calc(100% - 625px); }
+html.android-mobile #content .android-fit-page .tab-magnetometer-right-wrapper { float: right; width: 600px; }
+html.android-mobile #content .android-fit-page .tab-magnetometer-left-wrapper #interactive_block { height: 400px; }
+/* INAV's original console expands in its own cell; the action stays outside. */
+html.android-mobile #android-log-row #log { height: 2rem !important; overflow-y: hidden; }
+html.android-mobile #android-log-row #log.active { height: clamp(5rem, 22dvh, 12rem) !important; overflow-y: auto; }
+html.android-mobile #android-top-console { align-self: start; height: 2rem; }

@@ -1,0 +1,3 @@
+*.pdf binary
+# Preserve whitespace in upstream patch context.
+native-demo/firmware.patch -whitespace

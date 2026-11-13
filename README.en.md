@@ -170,3 +170,9 @@ the APK as `INAV.Configurator.Android_<version>.apk`.
 ## License
 
 GPL-3.0, same as upstream.
+
+## Mobile interface and demo
+
+See the [mobile changes and validation notes](docs/android-mobile.md),
+[screen preview PDF](docs/android-mobile-preview.pdf), and
+[native INAV demo build instructions](native-demo/README.md).

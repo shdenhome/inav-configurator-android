@@ -259,10 +259,15 @@ export default defineConfig({
         handler() {
           return [
             {
+              tag: 'meta',
+              attrs: { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=contain' },
+              injectTo: 'head-prepend',
+            },
+            {
               tag: 'script',
               attrs: { type: 'module' },
               children:
-                "import $ from 'jquery'; import 'inav-android-bridge'; window.$ = window.jQuery = $;",
+                "import $ from 'jquery'; import 'inav-android-bridge'; import 'inav-android-layout'; window.$ = window.jQuery = $;",
               injectTo: 'head-prepend',
             },
           ];
@@ -310,6 +315,7 @@ export default defineConfig({
     alias: [
       // ---- Unsere electronAPI-Brücke (siehe android-bootstrap oben) ----
       { find: /^inav-android-bridge$/, replacement: shim('electron-api.js') },
+      { find: /^inav-android-layout$/, replacement: shim('mobile-layout.js') },
 
       // ---- Falls Module serialport direkt importieren (Nebenpfade) ----
       { find: /^serialport$/, replacement: shim('serialport.js') },

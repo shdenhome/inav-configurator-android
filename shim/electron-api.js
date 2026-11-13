@@ -1,3 +1,4 @@
+import { appLog } from './app-log.js';
 // Nachbau der Electron-Preload-Brücke (inav-configurator/js/main/preload.js)
 // für die Android-WebView. Wird per vite.config.mobile.mjs als erstes Modul geladen.
 //
@@ -22,6 +23,26 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 
 const UsbSerial = registerPlugin('UsbSerial');
 const FileDialog = registerPlugin('FileDialog');
+const NativeDemo = registerPlugin('NativeDemo');
+let demoReady = Promise.resolve();
+const demoDataHandlers = new Set();
+const demoEndHandlers = new Set();
+const demoErrorHandlers = new Set();
+NativeDemo.addListener('output', ({ message }) => appLog('NATIVE DEMO', message)).catch(() => {});
+NativeDemo.addListener('data', ({ data }) => {
+  const bytes = fromBase64(data);
+  demoDataHandlers.forEach(handler => handler(bytes));
+}).catch(() => {});
+NativeDemo.addListener('failure', ({ message }) => {
+  if (document.documentElement.classList.contains('android-demo-active')) {
+    localStorage.setItem('inav-last-demo-error', message);
+    window.alert((navigator.language.startsWith('ru') ? 'Демо завершилось с ошибкой' : 'Demo stopped unexpectedly') + '\n\n' + message);
+  }
+}).catch(() => {});
+NativeDemo.addListener('end', () => {
+  document.documentElement.classList.remove('android-demo-active');
+  demoEndHandlers.forEach(handler => handler());
+}).catch(() => {});
 const STORE_PREFIX = 'inav-store:';
 
 /* ---------- Base64-Helfer (Binärdaten <-> natives Plugin) ---------- */
@@ -269,13 +290,44 @@ window.electronAPI = {
   openBackupDir: async () => notSupported('openBackupDir', undefined),
   listBackups: async () => notSupported('listBackups', []),
 
-  /* --- TCP/UDP (SITL) — nicht unterstützt --- */
-  tcpConnect: async () => notSupported('tcpConnect', false),
-  tcpClose: () => {},
-  tcpSend: async () => notSupported('tcpSend', 0),
-  onTcpError: (cb) => cb, offTcpError: () => {},
-  onTcpData: (cb) => cb, offTcpData: () => {},
-  onTcpEnd: (cb) => cb, offTcpEnd: () => {},
+  /* --- Desktop-compatible transport for the local INAV demo only. --- */
+  tcpConnect: async (host, port) => {
+    if (host !== '127.0.0.1' || Number(port) !== 5760) {
+      return { error: true, errorMsg: 'Only the local demo is supported on Android' };
+    }
+    try {
+      await demoReady;
+      appLog('DEMO', 'Connecting to local simulator');
+      const result = await NativeDemo.connect();
+      appLog('DEMO', 'Connected', result);
+      document.documentElement.classList.add('android-demo-active');
+      return { error: false, id: result.id };
+    } catch (e) {
+      document.documentElement.classList.remove('android-demo-active');
+      const message = String(e?.message || e);
+      appLog('DEMO ERROR', message);
+      const title = navigator.language.startsWith('ru') ? 'Демо не запустилось' : 'Demo could not start';
+      localStorage.setItem('inav-last-demo-error', message);
+      const entry = document.createElement('p');
+      entry.textContent = title + ': ' + message;
+      document.querySelector('#log .wrapper')?.append(entry);
+      window.alert(title + '\n\n' + message);
+      return { error: true, errorMsg: message };
+    }
+  },
+  tcpClose: () => NativeDemo.close().catch(console.error),
+  tcpSend: async data => {
+    try {
+      const result = await NativeDemo.send({ data: toBase64(toUint8(data)) });
+      return { error: false, bytesWritten: result.bytesWritten };
+    } catch (e) { return { error: true, msg: String(e?.message || e), bytesWritten: 0 }; }
+  },
+  onTcpError: cb => { demoErrorHandlers.add(cb); return cb; },
+  offTcpError: cb => demoErrorHandlers.delete(cb),
+  onTcpData: cb => { demoDataHandlers.add(cb); return cb; },
+  offTcpData: cb => demoDataHandlers.delete(cb),
+  onTcpEnd: cb => { demoEndHandlers.add(cb); return cb; },
+  offTcpEnd: cb => demoEndHandlers.delete(cb),
   udpConnect: async () => notSupported('udpConnect', false),
   udpClose: async () => {},
   udpSend: async () => notSupported('udpSend', 0),
@@ -417,9 +469,21 @@ window.electronAPI = {
   // Lesbarer Name für Ordner-URIs in der Oberfläche
   displayPath: (p) => displayTree(p),
 
-  /* --- Kindprozesse (SITL-Binary) — auf Android prinzipbedingt unmöglich --- */
-  startChildProcess: () => notSupported('startChildProcess', undefined),
-  killChildProcess: () => {},
+  /* --- Desktop demo lifecycle, backed by the packaged ARM64 SITL executable. --- */
+  startChildProcess: (_path, args = []) => {
+    // No arbitrary binaries or shell arguments cross the native bridge.
+    if (!args.some(arg => String(arg).endsWith('/demo.bin'))) {
+      return Promise.resolve(notSupported('startChildProcess', undefined));
+    }
+    appLog('DEMO', 'Starting Android INAV simulator');
+    demoReady = NativeDemo.start();
+    demoReady.catch(error => console.error('[Android demo]', error));
+    return demoReady;
+  },
+  killChildProcess: () => {
+    document.documentElement.classList.remove('android-demo-active');
+    return NativeDemo.stop().catch(console.error);
+  },
   onChildProcessStdout: (cb) => cb, offChildProcessStdout: () => {},
   onChildProcessStderr: (cb) => cb, offChildProcessStderr: () => {},
   onChildProcessError: (cb) => cb, offChildProcessError: () => {},

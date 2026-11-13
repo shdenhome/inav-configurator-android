@@ -10,13 +10,15 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         // App-lokale Plugins registrieren (VOR super.onCreate)
         registerPlugin(UsbSerialPlugin.class);
+        registerPlugin(NativeDemoPlugin.class);
         registerPlugin(FileDialogPlugin.class);
         super.onCreate(savedInstanceState);
 
-        // Desktop-UI auf kleinere Displays einpassen
+        // Use the CSS device viewport; the Android stylesheet handles layout.
         WebSettings s = getBridge().getWebView().getSettings();
         s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(true);
+        s.setLoadWithOverviewMode(false);
+        s.setTextZoom(100);
         s.setSupportZoom(true);
         s.setBuiltInZoomControls(true);
         s.setDisplayZoomControls(false);
