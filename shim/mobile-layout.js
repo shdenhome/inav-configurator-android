@@ -1,5 +1,6 @@
 import './mobile-layout.css';
 import './fit-page.js';
+import './osd-touch.js';
 
 // Keep Android layout changes in the wrapper, leaving the upstream intact.
 document.documentElement.classList.add('android-mobile');

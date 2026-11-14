@@ -232,3 +232,14 @@ html.android-mobile .tab-pid_tuning .resetbt a {
     display: flex; align-items: center; justify-content: center;
     width: 100%; min-height: 2.6em; box-sizing: border-box;
 }
+/* Touch OSD editing uses the same drop/save path as desktop dragging. */
+html.android-mobile .tab-osd .display-layout .preview .char[draggable="true"] {
+    touch-action: pinch-zoom; user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+html.android-mobile .tab-osd .android-osd-drag-source { outline: 2px solid #fff; }
+html.android-mobile .tab-osd .android-osd-drop-target { outline: 2px solid #37a8db; background: #37a8db88; }
+html.android-mobile .tab-osd .android-osd-touch-hint {
+    display: block; clear: both; padding: 4px 6px; font-size: 10px; line-height: 1.4; font-weight: normal;
+}
+html.android-mobile .tab-osd .gui_box.preview > .gui_box_titlebar { height: auto; min-height: 24px; }
