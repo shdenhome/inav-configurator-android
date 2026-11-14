@@ -9,6 +9,8 @@ einbindet. Verbindung zum Flight Controller per **USB-OTG** (MSP über VCP/CP210
 ## APK-Downloads für INAV 10.x
 
 [Builds und APK-Downloads](docs/builds.md) — aktuell: **Beta 1** (`10.0.0-rc1-mobile.9-beta.1`).
+[Alle ZIP-Builds in einem Ordner](https://drive.google.com/drive/folders/1brzl3lQoBVg83_piuLD596J3OWb0THJ-).
+
 Für Flugcontroller mit **INAV 10.x**, nicht INAV 9.x.
 
 ## Status
