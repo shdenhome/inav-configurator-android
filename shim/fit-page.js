@@ -8,7 +8,10 @@ function installPageFit() {
   let signature = '';
   function fit() {
     pending = false;
-    const page = content.firstElementChild;
+    // PID tuning inserts #content-watermark before the actual tab. Fit the
+    // tab itself, leaving decorative elements and loading indicators alone.
+    const page = [...content.children].find(element =>
+      [...element.classList].some(name => name.startsWith('tab-')));
     if (!page || !content.clientWidth || !content.clientHeight) return;
     page.classList.add('android-fit-page');
     // Maps and the text console already use the available viewport. Forms keep

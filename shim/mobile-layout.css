@@ -206,3 +206,29 @@ html.android-mobile #content .android-fit-page .tab-magnetometer-left-wrapper #i
 html.android-mobile #android-log-row #log { height: 2rem !important; overflow-y: hidden; }
 html.android-mobile #android-log-row #log.active { height: clamp(5rem, 22dvh, 12rem) !important; overflow-y: auto; }
 html.android-mobile #android-top-console { align-self: start; height: 2rem; }
+/* Keep PID subtabs together; the fitted page scales the complete row to fit. */
+html.android-mobile .tab-pid_tuning .subtab__header {
+    display: flex; flex-wrap: nowrap; align-items: center; gap: 4px;
+    width: max-content; min-width: 100%; height: auto; box-sizing: border-box;
+}
+html.android-mobile .tab-pid_tuning .subtab__header_label {
+    flex: 0 0 auto; min-width: 0; margin: 0; padding: 4px 6px;
+    font-size: 12px; line-height: 1.4; height: auto; white-space: nowrap;
+}
+html.android-mobile .tab-pid_tuning .subtab__header + .cf_doc_version_bt {
+    display: flow-root; clear: both; margin: 4px 0 8px;
+}
+html.android-mobile .tab-pid_tuning .subtab__header + .cf_doc_version_bt a {
+    margin-top: 0;
+}
+html.android-mobile .tab-pid_tuning :is(#subtab-pid, #subtab-pid-other) > .cf_column.right {
+    display: flex; justify-content: flex-end; align-items: stretch; gap: 8px;
+    margin-top: 0 !important;
+}
+html.android-mobile .tab-pid_tuning :is(#subtab-pid, #subtab-pid-other) > .cf_column.right > .resetbt {
+    display: flex; float: none; margin: 0 0 10px;
+}
+html.android-mobile .tab-pid_tuning .resetbt a {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; min-height: 2.6em; box-sizing: border-box;
+}
