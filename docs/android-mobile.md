@@ -1,6 +1,6 @@
 # Android layout and local demo — mobile.7
 
-## Updates after mobile.7 (not yet included in the published APK)
+## Updates in mobile.8
 
 [Updated screen PDF](android-ui-updates.pdf): 16 browser screenshots across
 portrait/landscape, covering navigation, all five PID subtabs and OSD editing.
@@ -49,7 +49,7 @@ Long forms show the initial visible area; scroll to reach further controls.
 - Implement demo lifecycle and MSP transport through a Capacitor native plugin
   and a packaged ARM64 INAV 10 simulator. Restrict the bridge to loopback; retain
   startup errors and process output for diagnosis. Physical USB remains separate.
-- Version `10.0.0-rc1-mobile.7`, Android versionCode 11.
+- Version `10.0.0-rc1-mobile.8`, Android versionCode 12.
 
 Changes live in the Android wrapper and build-time shims; the configurator
 submodule revision is unchanged. See [native demo source/build instructions](../native-demo/README.md).
@@ -81,3 +81,6 @@ Some hardware-dependent controls are unavailable in SITL (for example Blackbox).
 The simulator binary supports ARM64 only. The latest APK was not tested on an
 attached Android phone or emulator; browser/native-bridge tests do not establish
 physical-device USB or process-launch behavior.
+
+The mobile.8 APK was built with these changes. Its built web bundle passed the
+OSD gesture/MSP readback and PID geometry checks described above.
