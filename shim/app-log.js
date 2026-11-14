@@ -30,7 +30,7 @@ for (const level of ['log', 'info', 'warn', 'error', 'debug']) {
 }
 window.addEventListener('error', e => appLog('ERROR', e.error || e.message));
 window.addEventListener('unhandledrejection', e => appLog('REJECTION', e.reason));
-appLog('APP', 'Android wrapper mobile.7', navigator.userAgent);
+appLog('APP', 'Android wrapper mobile.8', navigator.userAgent);
 const previous = localStorage.getItem('inav-last-demo-error');
 if (previous) appLog('PREVIOUS DEMO ERROR', previous);
 
