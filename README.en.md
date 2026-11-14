@@ -8,7 +8,7 @@ submodule**. Connects to the flight controller via **USB OTG** (MSP over VCP/CP2
 
 ## APK downloads for INAV 10.x
 
-[Builds and APK download links](docs/builds.md) — latest: `10.0.0-rc1-mobile.8`.
+[Builds and APK download links](docs/builds.md) — latest: **Beta 1** (`10.0.0-rc1-mobile.9-beta.1`).
 For flight controllers running **INAV 10.x**, not INAV 9.x.
 
 ## Status

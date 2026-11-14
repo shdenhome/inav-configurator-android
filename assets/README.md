@@ -18,5 +18,5 @@ and run `node scripts/generate-app-icons.cjs`. `CHROMIUM_EXECUTABLE` can select
 an existing Chromium binary. This generates icon resources only, not an APK.
 
 Resource compilation (`aapt2 compile`) and density/safe-zone checks passed.
-The new icon will appear on devices after installing a new APK built from these
-sources; the already published mobile.8 APK retains its previous icon.
+The new icon is included in Beta 1 (`10.0.0-rc1-mobile.9-beta.1`).
+The older mobile.8 APK retains its previous icon.
