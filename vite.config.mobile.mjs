@@ -133,7 +133,7 @@ export default defineConfig({
             tag: 'style',
             children:
               '.tab-cli .msc, .tab-cli .copy, .tab-cli .diffall, ' +
-              '#tabs .tab_firmware_flasher, #tabs .tab_sitl { display: none !important; } ' +
+              '#tabs .tab_firmware_flasher, #tabs .tab_sitl, #tabs .tab_javascript_programming { display: none !important; } ' +
               // Map Generator: "Eject SD Card" gibt es auf Android nicht (Laufwerks-
               // buchstaben); Ordnerwahl + "Sync to SD Card" laufen über SAF.
               '#mapgen_eject_sd { display: none !important; } ' +
